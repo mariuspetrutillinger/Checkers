@@ -1,7 +1,9 @@
 from constants import *
 import pygame
 
+# Class to represent a piece on the board
 class Piece:
+    # Function to initialize the piece
     def __init__(self, row, col, player):
         self.row = row
         self.col = col
@@ -13,9 +15,11 @@ class Piece:
         else:
             self.direction = 1
 
+    # Function to make the piece a king
     def make_king(self):
         self.king = True
 
+    # Function to draw the piece on the screen
     def draw(self, screen):
         color = MAX_COLOR if self.player == 1 else MIN_COLOR
         pygame.draw.circle(screen, color, (self.col * SQUARE_SIZE + SQUARE_SIZE // 2, self.row * SQUARE_SIZE + SQUARE_SIZE // 2), PIECE_RADIUS)
@@ -23,24 +27,27 @@ class Piece:
             color = MAX_KING_COLOR if self.player == 1 else MIN_KING_COLOR
             pygame.draw.circle(screen, color, (self.col * SQUARE_SIZE + SQUARE_SIZE // 2, self.row * SQUARE_SIZE + SQUARE_SIZE // 2), PIECE_RADIUS // 2, 5)
 
+    # Function to check if a move is valid for the piece
     def is_valid_move(self, end, capture=False):
-        start_row, start_col = self.row, self.col
         end_row, end_col = end
-        if self.king:
-            if capture:
-                return abs(end_row - start_row) == abs(end_col - start_col) == 2
-            else:
-                return abs(end_row - start_row) == abs(end_col - start_col) == 1
-        if self.player == 1:
-            if capture:
-                return end_row - start_row == -2 and abs(end_col - start_col) == 2;
-            else:
-                return end_row - start_row == -1 and abs(end_col - start_col) == 1;
+        row_diff = end_row - self.row
+        col_diff = end_col - self.col
+
+        if not capture:
+            if abs(row_diff) != 1 or abs(col_diff) != 1:
+                return False
+
+            if not self.king and row_diff != self.direction:
+                return False
+
         else:
-            if capture:
-                return end_row - start_row == 2 and abs(end_col - start_col) == 2;
-            else:
-                return end_row - start_row == 1 and abs(end_col - start_col) == 1;
+            if abs(row_diff) != 2 or abs(col_diff) != 2:
+                return False
+
+            if not self.king and row_diff != 2 * self.direction:
+                return False
+
+        return True
 
     def __repr__(self):
         return f"Piece({self.row}, {self.col}, {self.player})"
