@@ -23,9 +23,14 @@ def draw_pieces(game_board):
                 game_board.board[row][col].draw(screen)
 
 # Function to start the game, run the game and check for events
-def game_loop():
-    main_board = GameBoard()
-    ai = AI(2, main_board, 3)
+def game_loop(algorithm, difficulty, color):
+    color = int(color)
+    if color == 1:
+        main_board = GameBoard(1)
+        ai = AI(2, main_board, int(difficulty))
+    else:
+        main_board = GameBoard(2)
+        ai = AI(1, main_board, int(difficulty))
     print ("Player's turn")
     start_time = time.time()
     while main_board.winner() == None:
@@ -34,14 +39,16 @@ def game_loop():
                 pygame.quit()
                 print (f"Time taken: {time.time() - start_time}")
                 return
-            if main_board.current_player == 1:
+            if main_board.current_player == color:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
                     main_board.handle_mouse_click(x, y)
                     ai.update(main_board)
             else:
                 print ("AI's turn")
+                print (ai.game_board)
                 ai.make_move()
+                print (ai.game_board)
                 main_board.update(ai.game_board)
                 print ("Player's turn")
         
@@ -50,9 +57,9 @@ def game_loop():
         pygame.display.update()
         
 
-    if main_board.winner() == 1:
-        print ("Player wins")
-    elif main_board.winner() == 2:
-        print ("AI wins")
+    if main_board.winner() == "Draw":
+        print ("Game is a draw")
+    else:
+        print (f"Player {main_board.winner()} wins")
 
     print (f"Time taken: {time.time() - start_time}")

@@ -8,7 +8,7 @@ from piece import Piece
 # This class also serves as a state of the game
 class GameBoard:
     # Function to initialize the game board
-    def __init__(self):
+    def __init__(self, color):
         self.board = [[None] * BOARD_SIZE for _ in range(BOARD_SIZE)]
         self.selected_piece = None
         self.mandatory_capture_pieces = []
@@ -17,13 +17,24 @@ class GameBoard:
         self.red_pieces = 12
         self.black_kings = 0
         self.red_kings = 0
+        self.color = color
 
-        for row in range(BOARD_SIZE):
-            for col in range(BOARD_SIZE):
-                if row < 3 and (row + col) % 2 == 1:
-                    self.board[row][col] = Piece(row, col, 2)  # AI's pieces
-                elif row > 4 and (row + col) % 2 == 1:
-                    self.board[row][col] = Piece(row, col, 1)  # Player 1's pieces
+        if color == 1:
+            for row in range(BOARD_SIZE):
+                for col in range(BOARD_SIZE):
+                    if row < 3 and (row + col) % 2 == 1:
+                        self.board[row][col] = Piece(row, col, 2, color)  # AI's pieces
+                    elif row > 4 and (row + col) % 2 == 1:
+                        self.board[row][col] = Piece(row, col, 1, color)  # Player 1's pieces
+        elif color == 2:
+            for row in range(BOARD_SIZE):
+                for col in range(BOARD_SIZE):
+                    if row < 3 and (row + col) % 2 == 1:
+                        self.board[row][col] = Piece(row, col, 1, color)  # AI's pieces
+                        print (self.board[row][col])
+                    elif row > 4 and (row + col) % 2 == 1:
+                        self.board[row][col] = Piece(row, col, 2, color)  # Player 1's pieces
+                        print (self.board[row][col])
 
     # Function to handle mouse clicks
     def handle_mouse_click(self, x, y):
@@ -41,12 +52,10 @@ class GameBoard:
                 try:
                     self.move_piece(self.selected_piece, (row, col))
                     self.selected_piece = None
-                    print (self.get_all_moves(2))
                 except:
-                    print ("Invalid move")
+                    print ("Invalid move. Try again")
 
         if self.board[row][col] != None and self.board[row][col].player == self.current_player:
-            print ("Selected piece at row: ", row, " col: ", col)
             self.selected_piece = self.board[row][col]
             self.mandatory_capture_pieces = self.mandatory_capture(self.selected_piece)
         
@@ -55,10 +64,7 @@ class GameBoard:
         start_row, start_col = piece.row, piece.col
         end_row, end_col = end
 
-        print ("Moving piece from row: ", start_row, " col: ", start_col, " to row: ", end_row, " col: ", end_col)
-        print ("Capture: ", capture)
         move_possible = piece.is_valid_move(end, capture)
-        print ("Move possible: ", move_possible)
 
         if move_possible:
             if self.board[end_row][end_col] == None:
@@ -94,6 +100,22 @@ class GameBoard:
     # Function to check if a move is valid for capture
     def is_capture_move(self, piece, end):
         end_row, end_col = end
+        if not piece.king:
+            if self.color == 1:
+                if piece.player == 1:
+                    if end_row > piece.row:
+                        return False
+                elif piece.player == 2:
+                    if end_row < piece.row:
+                        return False
+            elif self.color == 2:
+                if piece.player == 1:
+                    if end_row < piece.row:
+                        return False
+                elif piece.player == 2:
+                    if end_row > piece.row:
+                        return False
+
         middle_row, middle_col = self.get_middle_position((piece.row, piece.col), end)
         if self.board[end_row][end_col] == None and self.board[middle_row][middle_col] != None and self.board[middle_row][middle_col].player != piece.player:
             return True
@@ -110,17 +132,11 @@ class GameBoard:
             for move in possible_moves:
                 if self.is_capture_move(piece, move):
                     capture_list.append(move)
-        elif piece.player == 1:
-            for move in possible_moves[2:]:
-                if self.is_capture_move(piece, move):
-                    capture_list.append(move)
         else:
-            for move in possible_moves[:2]:
+            for move in possible_moves:
                 if self.is_capture_move(piece, move):
                     capture_list.append(move)
         
-        if (self.current_player == 1):
-            print ("Mandatory capture pieces: ", capture_list)
         return capture_list
     
     # Function to get the middle position between two Pieces 
@@ -146,18 +162,32 @@ class GameBoard:
         row, col = piece.row, piece.col
         possible_moves = [(row + 1, col + 1), (row + 1, col - 1), (row - 1, col + 1), (row - 1, col - 1)]
         possible_moves = [(r, c) for r, c in possible_moves if r >= 0 and r < BOARD_SIZE and c >= 0 and c < BOARD_SIZE]
-        if piece.king:
-            for move in possible_moves:
-                if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
-                    valid_moves.append(move)
-        elif piece.player == 1:
-            for move in possible_moves[2:]:
-                if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
-                    valid_moves.append(move)
-        else:
-            for move in possible_moves[:2]:
-                if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
-                    valid_moves.append(move)
+        if self.color == 1:
+            if piece.king:
+                for move in possible_moves:
+                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                        valid_moves.append(move)
+            elif piece.player == 1:
+                for move in possible_moves[2:]:
+                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                        valid_moves.append(move)
+            else:
+                for move in possible_moves[:2]:
+                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                        valid_moves.append(move)
+        elif self.color == 2:
+            if piece.king:
+                for move in possible_moves:
+                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                        valid_moves.append(move)
+            elif piece.player == 2:
+                for move in possible_moves[2:]:
+                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                        valid_moves.append(move)
+            else:
+                for move in possible_moves[:2]:
+                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                        valid_moves.append(move)
         
         return valid_moves
 
@@ -178,8 +208,21 @@ class GameBoard:
         elif self.red_pieces == 0 and self.black_pieces != 0:
             return "Black"
         else:
-            return None
-                
+            if self.color == 1:
+                black_moves = self.get_all_moves(1)
+                red_moves = self.get_all_moves(2)
+            else:
+                black_moves = self.get_all_moves(2)
+                red_moves = self.get_all_moves(1)
+
+            if len(black_moves) == 0 and len(red_moves) == 0:
+                return "Draw"
+            elif len(black_moves) == 0:
+                return "Red"
+            elif len(red_moves) == 0:
+                return "Black"
+
+        return None    
 
     def update(self, game_board):
         self.board = deepcopy(game_board.board)
