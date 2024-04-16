@@ -4,16 +4,23 @@ import pygame
 # Class to represent a piece on the board
 class Piece:
     # Function to initialize the piece
-    def __init__(self, row, col, player):
+    def __init__(self, row, col, player, color):
         self.row = row
         self.col = col
         self.player = player
+        self.color = color
         self.king = False
 
-        if self.player == 1:
-            self.direction = -1
+        if self.color == 1:
+            if self.player == 1:
+                self.direction = -1
+            else:
+                self.direction = 1
         else:
-            self.direction = 1
+            if self.player == 1:
+                self.direction = 1
+            else:
+                self.direction = -1
 
     # Function to make the piece a king
     def make_king(self):
