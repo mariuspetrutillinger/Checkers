@@ -17,9 +17,16 @@ class AI:
         else:
             return self.game_board.black_pieces - self.game_board.red_pieces + 2 * (self.game_board.black_kings - self.game_board.red_kings)
         
+    # Second function to evaluate the board state and establish a score
     def evaluate_by_composite(self):
+        # the score will be determined using a composite of the number of pieces, the number of kings, and the position of the pieces
+        # first we will initialize the score with the number of pieces and kings
         red_score = self.game_board.red_pieces + 2 * self.game_board.red_kings
         black_score = self.game_board.black_pieces + 2 * self.game_board.black_kings
+
+        # as the game progresses, the position of the pieces will become more important
+        # we will add the row number of the pieces to the score
+        # because as the pieces move forward, they become more valuable being more versatile in their moves
         for row in range(BOARD_SIZE):
             for col in range(BOARD_SIZE):
                 if self.game_board.board[row][col] != None:
@@ -31,6 +38,9 @@ class AI:
         black_pieces = self.game_board.get_all_pieces(1)
         red_pieces = self.game_board.get_all_pieces(2)
 
+        # we will also add a bonus to the score if the pieces are on the edges of the board
+        # as the pieces at the left and right edges are defended and able to take other pieces more easily
+        # and the pieces at the starting position are able to defend and not let the enemy have kings
         for piece in black_pieces:
             if piece[1] == 0 or piece[1] == BOARD_SIZE - 1:
                 black_score += 5
@@ -84,6 +94,7 @@ class AI:
             
             return max_eval, best_move
 
+    # Function for minimax algorithm with alpha beta pruning to optimize the search
     def minimax_alpha_beta(self, board, depth, player, alpha, beta):
         if depth == 0 or board.winner() != None:
             return self.evaluate_by_composite(), None
@@ -116,7 +127,7 @@ class AI:
             
             return max_eval, best_move
 
-    # Function to make a move
+    # Function to make a move for the ai based on the best move found by the minimax algorithm
     def make_move(self):
         move = self.minimax_alpha_beta(self.game_board, self.depth, self.player, float("-inf"), float("inf"))[1]
         if move == None:

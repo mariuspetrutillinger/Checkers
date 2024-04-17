@@ -19,6 +19,7 @@ class GameBoard:
         self.red_kings = 0
         self.color = color
 
+        # building the board will be different depending on wether the player is playing with red or black pieces
         if color == 1:
             for row in range(BOARD_SIZE):
                 for col in range(BOARD_SIZE):
@@ -36,7 +37,7 @@ class GameBoard:
                         self.board[row][col] = Piece(row, col, 2, color)  # Player 1's pieces
                         print (self.board[row][col])
 
-    # Function to handle mouse clicks
+    # Function to handle mouse clicks, assign the selected piece and move it if possible
     def handle_mouse_click(self, x, y):
         row, col = y // SQUARE_SIZE, x // SQUARE_SIZE
         print (self)
@@ -59,7 +60,7 @@ class GameBoard:
             self.selected_piece = self.board[row][col]
             self.mandatory_capture_pieces = self.mandatory_capture(self.selected_piece)
         
-    # Function to move a piece if possible
+    # Function to move a piece if possible, check if the piece becomes a king and change the turn
     def move_piece(self, piece, end, capture=False):
         start_row, start_col = piece.row, piece.col
         end_row, end_col = end
@@ -122,7 +123,8 @@ class GameBoard:
         
         return False
 
-    # Function to get all capture moves for a piece
+    # Function to get all capture moves for a piece if there are any
+    # If there are any capture moves, the player must make a capture move and cannot make a normal move (for a specific piece)
     def mandatory_capture(self, piece):
         capture_list = []
         row, col = piece.row, piece.col
@@ -139,13 +141,13 @@ class GameBoard:
         
         return capture_list
     
-    # Function to get the middle position between two Pieces 
+    # Function to get the middle position between two positions used to handle captures
     def get_middle_position(self, start, end):
         start_row, start_col = start
         end_row, end_col = end
         return (start_row + end_row) // 2, (start_col + end_col) // 2
 
-    # Function to get all possible moves for a player
+    # Function to get all possible moves for a player (normal and capture moves) as they will serve as succesors for the current state
     def get_all_moves(self, player):
         all_moves = []
         for row in range(BOARD_SIZE):
@@ -201,7 +203,7 @@ class GameBoard:
         
         return pieces
 
-    # Function to return the winner of the game
+    # Function to return the winner of the game based on the number of pieces and the number of moves available
     def winner(self):
         if self.black_pieces == 0 and self.red_pieces != 0:
             return "Red"
@@ -224,6 +226,7 @@ class GameBoard:
 
         return None    
 
+    # Function to update the game board (used to update the image shown on screen as well as the information provided by the AI)
     def update(self, game_board):
         self.board = deepcopy(game_board.board)
         self.current_player = game_board.current_player
@@ -235,6 +238,7 @@ class GameBoard:
     def __repr__(self):
         return f"GameBoard({self.board})"
     
+    # Function to print the board and the game state in the console
     def __str__(self):
         board_representation = ""
         for row in range(BOARD_SIZE):

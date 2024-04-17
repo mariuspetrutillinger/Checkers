@@ -11,6 +11,8 @@ class Piece:
         self.color = color
         self.king = False
 
+        # we are going to add a new attribute to the Piece class called direction. 
+        # this attribute will be used to determine the direction in which the piece can move. 
         if self.color == 1:
             if self.player == 1:
                 self.direction = -1
@@ -34,7 +36,7 @@ class Piece:
             color = MAX_KING_COLOR if self.player == 1 else MIN_KING_COLOR
             pygame.draw.circle(screen, color, (self.col * SQUARE_SIZE + SQUARE_SIZE // 2, self.row * SQUARE_SIZE + SQUARE_SIZE // 2), PIECE_RADIUS // 2, 5)
 
-    # Function to check if a move is valid for the piece
+    # Function to check if a move is valid for the piece using the difference in position and the direction of the piece
     def is_valid_move(self, end, capture=False):
         end_row, end_col = end
         row_diff = end_row - self.row
