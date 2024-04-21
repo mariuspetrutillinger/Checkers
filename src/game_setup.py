@@ -2,6 +2,7 @@ def input_algorithm():
     while True:
         algorithm = input("Enter the number of the algorithm you would like to play against: ")
         if algorithm == "1" or algorithm == "2" or algorithm == "3":
+            print ("Only minimax is available at the moment.")
             return algorithm
         else:
             print("Invalid input. Please enter a valid number.")

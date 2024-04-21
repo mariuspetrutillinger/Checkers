@@ -1,4 +1,5 @@
 from constants import *
+from copy import deepcopy
 import pygame
 
 # Class to represent a piece on the board
@@ -10,6 +11,10 @@ class Piece:
         self.player = player
         self.color = color
         self.king = False
+        self.score = self.get_score()
+        self.positions = []
+
+        # positions will hold the data regarding the positions that the piece moved to
 
         # we are going to add a new attribute to the Piece class called direction. 
         # this attribute will be used to determine the direction in which the piece can move. 
@@ -23,6 +28,44 @@ class Piece:
                 self.direction = 1
             else:
                 self.direction = -1
+
+    # Function to evaluate the score of one piece 
+    def get_score(self):
+        # the first step is to give value to its existence
+        # and if it is a king, we will give it a higher value
+        score = 1
+        if self.king:
+            score += 10
+
+        # the second step is to give value to the position of the piece
+        if self.color == self.player:
+            score += BOARD_SIZE - 1 - self.row
+        else:
+            score += self.row
+        
+        # the third step is to give value to the advantages of the piece
+        # if the piece is at the edge of the board, we will give it a higher value
+        # or if the piece is at the starting position, we will give it a higher value
+        # since it is keeping other pieces from becoming kings
+        if self.col == 0 or self.col == BOARD_SIZE - 1:
+            score += 5
+
+        if self.color == 1:
+            if self.player == 1:
+                if self.row == BOARD_SIZE - 1:
+                    score += 10
+            elif self.player == 2:
+                if self.row == 0:
+                    score += 10
+        else:
+            if self.player == 1:
+                if self.row == 0:
+                    score += 10
+            elif self.player == 2:
+                if self.row == BOARD_SIZE - 1:
+                    score += 10
+
+        return score
 
     # Function to make the piece a king
     def make_king(self):

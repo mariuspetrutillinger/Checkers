@@ -2,6 +2,8 @@ import pygame
 import time
 from board import GameBoard
 from ai import AI
+from astar_variation_for_piece import A_Star_for_piece
+from copy import deepcopy
 from constants import *
 
 pygame.init()
@@ -25,13 +27,13 @@ def draw_pieces(game_board):
 # Function to start the game, run the game and check for events
 def game_loop(algorithm, difficulty, color):
     color = int(color)
-    if color == 1:
-        main_board = GameBoard(1)
-        ai = AI(2, main_board, int(difficulty))
-    else:
-        main_board = GameBoard(2)
-        ai = AI(1, main_board, int(difficulty))
-    print ("Player's turn")
+    algorithm = int(algorithm)
+    difficulty = int(difficulty)
+    
+    main_board = GameBoard(color)
+    ai = AI(3-color, main_board, difficulty, color)
+    astar = A_Star_for_piece(main_board, color, color)
+
     start_time = time.time()
     while main_board.winner() == None:
         for event in pygame.event.get():
@@ -43,12 +45,17 @@ def game_loop(algorithm, difficulty, color):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
                     main_board.handle_mouse_click(x, y)
+                    if main_board.selected_piece != None:
+                        copy_board = deepcopy(main_board)
+                        astar.update(main_board)
+                        astar.ida_star(main_board.selected_piece)
+                        main_board.update(astar.game_board)
+                        main_board.update(copy_board)
                     ai.update(main_board)
             else:
                 print ("AI's turn")
-                print (ai.game_board)
                 ai.make_move()
-                print (ai.game_board)
+                # print (ai.game_board)
                 main_board.update(ai.game_board)
                 print ("Player's turn")
         
@@ -61,5 +68,5 @@ def game_loop(algorithm, difficulty, color):
         print ("Game is a draw")
     else:
         print (f"Player {main_board.winner()} wins")
-
+    print (f"Score: {main_board.board_score}")
     print (f"Time taken: {time.time() - start_time}")

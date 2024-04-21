@@ -4,11 +4,11 @@ from copy import deepcopy
 
 class AI:
     # Function to initialize the AI
-    # The AI will mainly play with red pieces (player 2)
-    def __init__(self, player, game_board, depth):
+    def __init__(self, player, game_board, depth, color):
         self.player = player
         self.game_board = deepcopy(game_board)
         self.depth = depth * 3
+        self.color = color
 
     # Function to evaluate the board state
     def evaluate_by_piece_number(self):
@@ -27,13 +27,22 @@ class AI:
         # as the game progresses, the position of the pieces will become more important
         # we will add the row number of the pieces to the score
         # because as the pieces move forward, they become more valuable being more versatile in their moves
-        for row in range(BOARD_SIZE):
-            for col in range(BOARD_SIZE):
-                if self.game_board.board[row][col] != None:
-                    if self.game_board.board[row][col].player == 1:
-                        red_score += row
-                    else:
-                        black_score += BOARD_SIZE - row
+        if self.color == 1:
+            for row in range(BOARD_SIZE):
+                for col in range(BOARD_SIZE):
+                    if self.game_board.board[row][col] != None:
+                        if self.game_board.board[row][col].player == 1:
+                            black_score += BOARD_SIZE - 1 - row
+                        else:
+                            red_score += row
+        else:
+            for row in range(BOARD_SIZE):
+                for col in range(BOARD_SIZE):
+                    if self.game_board.board[row][col] != None:
+                        if self.game_board.board[row][col].player == 2:
+                            red_score += BOARD_SIZE - 1 - row
+                        else:
+                            black_score += row
 
         black_pieces = self.game_board.get_all_pieces(1)
         red_pieces = self.game_board.get_all_pieces(2)
@@ -62,62 +71,123 @@ class AI:
         else:
             return black_score - red_score
 
-    # Function to get all possible moves for the AI
-    def get_all_moves(self):
-        all_moves = self.game_board.get_all_moves(self.player)
-        return all_moves
+    # Function to get the evaluation from the board score
+    def evaluate_by_board_score(self, game_board):
+        return game_board.get_board_score()
+
+    # # Function to get all possible moves for the AI
+    # def get_all_moves(self):
+    #     all_moves = self.game_board.get_all_moves(self.player)
+    #     return all_moves
     
-    # Function for minimax algorithm 
-    def minimax(self, board, depth, player):
-        if depth == 0 or board.winner() != None:
-            return self.evaluate_by_composite(), None
+    # # Function for minimax algorithm 
+    # def minimax(self, board, depth, player):
+    #     if depth == 0 or board.winner() != None:
+    #         return self.evaluate_by_board_score(), None
 
-        if player == 2:
-            min_eval = float("inf")
-            best_move = None
-            for move in self.get_all_moves():
-                evaluation = self.minimax(board, depth - 1, 1)[0]
-                min_eval = min(min_eval, evaluation)
-                if min_eval == evaluation:
-                    best_move = move
+    #     if player == 2:
+    #         min_eval = float("inf")
+    #         best_move = None
+    #         for move in self.get_all_moves():
+    #             evaluation = self.minimax(board, depth - 1, 1)[0]
+    #             min_eval = min(min_eval, evaluation)
+    #             if min_eval == evaluation:
+    #                 best_move = move
 
-            return min_eval, best_move
+    #         return min_eval, best_move
 
-        else:
-            max_eval = float("-inf")
-            best_move = None
-            for move in self.get_all_moves():
-                evaluation = self.minimax(board, depth - 1, 2)[0]
-                max_eval = max(max_eval, evaluation)
-                if max_eval == evaluation:
-                    best_move = move
+    #     else:
+    #         max_eval = float("-inf")
+    #         best_move = None
+    #         for move in self.get_all_moves():
+    #             evaluation = self.minimax(board, depth - 1, 2)[0]
+    #             max_eval = max(max_eval, evaluation)
+    #             if max_eval == evaluation:
+    #                 best_move = move
             
-            return max_eval, best_move
+    #         return max_eval, best_move
 
-    # Function for minimax algorithm with alpha beta pruning to optimize the search
-    def minimax_alpha_beta(self, board, depth, player, alpha, beta):
-        if depth == 0 or board.winner() != None:
-            return self.evaluate_by_composite(), None
+    # # Function for minimax algorithm with alpha beta pruning to optimize the search
+    # def minimax_alpha_beta(self, board, depth, player, alpha, beta):
+    #     if depth == 0 or board.winner() != None:
+    #         return self.evaluate_by_board_score(), None
+
+    #     if player == 2:
+    #         print ("Player 2")
+    #         min_eval = float("inf")
+    #         best_move = None
+    #         print ("All moves: ", self.get_all_moves())
+    #         for move in self.get_all_moves():
+    #             new_board = deepcopy(board)
+    #             self.act_move(new_board, move)
+    #             print (new_board)
+    #             evaluation = self.minimax_alpha_beta(new_board, depth - 1, 1, alpha, beta)[0]
+    #             min_eval = min(min_eval, evaluation)
+    #             if min_eval == evaluation:
+    #                 best_move = move
+    #             beta = min(beta, min_eval)
+    #             if beta <= alpha:
+    #                 break
+            
+    #         print ("Best move: ", best_move)
+    #         return min_eval, best_move
+
+    #     else:
+    #         print ("Player 1")
+    #         max_eval = float("-inf")
+    #         best_move = None
+    #         print ("All moves: ", self.get_all_moves())
+    #         for move in self.get_all_moves():
+    #             new_board = deepcopy(board)
+    #             self.act_move(new_board, move)
+    #             print (new_board)
+    #             evaluation = self.minimax_alpha_beta(new_board, depth - 1, 2, alpha, beta)[0]
+    #             max_eval = max(max_eval, evaluation)
+    #             if max_eval == evaluation:
+    #                 best_move = move
+    #             alpha = max(alpha, max_eval)
+    #             if beta <= alpha:
+    #                 break
+            
+    #         print ("Best move: ", best_move)
+    #         return max_eval, best_move
+
+    # Function for getting all mvoes and their respective boards after the move
+    def get_all_moves_and_boards(self, player):
+        all_moves_and_boards = []
+        all_moves = self.game_board.get_all_moves(player)
+
+        for move in all_moves:
+            new_board = deepcopy(self.game_board)
+            self.act_move(new_board, move)
+            all_moves_and_boards.append([new_board, move])
+
+        return all_moves_and_boards
+
+    # Function for minimax algorithm with alpha beta pruning
+    def minimax_alpha_beta(self, position, depth, player, alpha, beta):
+        if depth == 0 or position[0].winner() != None:
+            return self.evaluate_by_board_score(position[0]), None
 
         if player == 2:
             min_eval = float("inf")
             best_move = None
-            for move in self.get_all_moves():
-                evaluation = self.minimax_alpha_beta(board, depth - 1, 1, alpha, beta)[0]
+            for move in self.get_all_moves_and_boards(player):
+                evaluation = self.minimax_alpha_beta(move, depth - 1, 1, alpha, beta)[0]
                 min_eval = min(min_eval, evaluation)
                 if min_eval == evaluation:
                     best_move = move
                 beta = min(beta, min_eval)
                 if beta <= alpha:
                     break
-
+            
             return min_eval, best_move
 
         else:
             max_eval = float("-inf")
             best_move = None
-            for move in self.get_all_moves():
-                evaluation = self.minimax_alpha_beta(board, depth - 1, 2, alpha, beta)[0]
+            for move in self.get_all_moves_and_boards(player):
+                evaluation = self.minimax_alpha_beta(move, depth - 1, 2, alpha, beta)[0]
                 max_eval = max(max_eval, evaluation)
                 if max_eval == evaluation:
                     best_move = move
@@ -129,16 +199,32 @@ class AI:
 
     # Function to make a move for the ai based on the best move found by the minimax algorithm
     def make_move(self):
-        move = self.minimax_alpha_beta(self.game_board, self.depth, self.player, float("-inf"), float("inf"))[1]
+        move = self.minimax_alpha_beta([self.game_board, None], self.depth, self.player, float("-inf"), float("inf"))[1][1]
         if move == None:
             return
         start_row, start_col, end_pos = move
         if abs(start_row - end_pos[0]) == 1:
+            print ("AI made normal move")
             self.game_board.move_piece(self.game_board.board[start_row][start_col], end_pos)
         elif abs(start_row - end_pos[0]) == 2:
+            print ("AI made capture move")
             self.game_board.capture_piece(self.game_board.board[start_row][start_col], end_pos)
-            middle_row, middle_col = self.game_board.get_middle_position((start_row, start_col), end_pos)
-            print (self.game_board.board[middle_row][middle_col])
+
+    def act_move(self, board, move):
+        if move != None:
+            start_row, start_col, end_pos = move
+            piece = board.board[start_row][start_col]
+            if piece is not None:
+                if abs(start_row - end_pos[0]) == 1:
+                    try:
+                        board.move_piece(board.board[start_row][start_col], end_pos)
+                    except:
+                        return
+                elif abs(start_row - end_pos[0]) == 2:
+                    try:
+                        board.capture_piece(board.board[start_row][start_col], end_pos)
+                    except:
+                        return
     
     def update(self, game_board):
         self.game_board = deepcopy(game_board)

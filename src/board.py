@@ -18,6 +18,7 @@ class GameBoard:
         self.black_kings = 0
         self.red_kings = 0
         self.color = color
+        self.board_score = 0
 
         # building the board will be different depending on wether the player is playing with red or black pieces
         if color == 1:
@@ -32,10 +33,10 @@ class GameBoard:
                 for col in range(BOARD_SIZE):
                     if row < 3 and (row + col) % 2 == 1:
                         self.board[row][col] = Piece(row, col, 1, color)  # AI's pieces
-                        print (self.board[row][col])
                     elif row > 4 and (row + col) % 2 == 1:
                         self.board[row][col] = Piece(row, col, 2, color)  # Player 1's pieces
-                        print (self.board[row][col])
+        
+        self.board_score = self.get_board_score()
 
     # Function to handle mouse clicks, assign the selected piece and move it if possible
     def handle_mouse_click(self, x, y):
@@ -65,25 +66,28 @@ class GameBoard:
         start_row, start_col = piece.row, piece.col
         end_row, end_col = end
 
+        # when a move piece action is engaged we check if the move is possible
         move_possible = piece.is_valid_move(end, capture)
+        # if the move is possible and the space we want to move to is empty then we will change
+        # the values of the end position to match the piece we wanted to move
+        # and see whether the piece has reached the end of the board to become a king
+        if move_possible and self.board[end_row][end_col] == None:
+            self.board[end_row][end_col] = piece
+            self.board[start_row][start_col] = None
+            self.board[end_row][end_col].row = end_row
+            self.board[end_row][end_col].col = end_col
 
-        if move_possible:
-            if self.board[end_row][end_col] == None:
-                self.board[end_row][end_col] = piece
-                self.board[start_row][start_col] = None
-                self.board[end_row][end_col].row = end_row
-                self.board[end_row][end_col].col = end_col
+            if end_row == 0 or end_row == 7:
+                self.board[end_row][end_col].make_king()
+                if self.board[end_row][end_col].player == 1:
+                    self.black_kings += 1
+                else:
+                    self.red_kings += 1
 
-                if end_row == 0 or end_row == 7:
-                    self.board[end_row][end_col].make_king()
-                    if self.board[end_row][end_col].player == 1:
-                        self.black_kings += 1
-                    else:
-                        self.red_kings += 1
-
-                self.current_player = 1 if self.current_player == 2 else 2
+            # at the end if the move was succesful we will change the turn and update the board score
+            self.current_player = 1 if self.current_player == 2 else 2
         else:
-            throw("Invalid move")
+            raise Exception("Invalid move")
 
     # Function used to "capture" a piece
     def capture_piece(self, piece, end):
@@ -162,8 +166,11 @@ class GameBoard:
     def get_valid_moves(self, piece):
         valid_moves = []
         row, col = piece.row, piece.col
+        # we are getting a list of all possible moves that can be split for moves that are upwards and downwards
         possible_moves = [(row + 1, col + 1), (row + 1, col - 1), (row - 1, col + 1), (row - 1, col - 1)]
         possible_moves = [(r, c) for r, c in possible_moves if r >= 0 and r < BOARD_SIZE and c >= 0 and c < BOARD_SIZE]
+        
+        # depending on the side we are playing on and the type of piece we are moving we will get the valid moves
         if self.color == 1:
             if piece.king:
                 for move in possible_moves:
@@ -210,12 +217,8 @@ class GameBoard:
         elif self.red_pieces == 0 and self.black_pieces != 0:
             return "Black"
         else:
-            if self.color == 1:
-                black_moves = self.get_all_moves(1)
-                red_moves = self.get_all_moves(2)
-            else:
-                black_moves = self.get_all_moves(2)
-                red_moves = self.get_all_moves(1)
+            black_moves = self.get_all_moves(1)
+            red_moves = self.get_all_moves(2) 
 
             if len(black_moves) == 0 and len(red_moves) == 0:
                 return "Draw"
@@ -234,7 +237,21 @@ class GameBoard:
         self.red_pieces = game_board.red_pieces
         self.black_kings = game_board.black_kings
         self.red_kings = game_board.red_kings
-        
+        self.board_score = game_board.board_score
+
+    # Function to get the score of the board
+    def get_board_score(self):
+        board_score = 0
+        for row in range(BOARD_SIZE):
+            for col in range(BOARD_SIZE):
+                if self.board[row][col] != None:
+                    if self.board[row][col].player == 1:
+                        board_score += self.board[row][col].score
+                    else:
+                        board_score -= self.board[row][col].score
+
+        return board_score
+
     def __repr__(self):
         return f"GameBoard({self.board})"
     
@@ -249,3 +266,12 @@ class GameBoard:
                     board_representation += str(self.board[row][col].player) + " "
             board_representation += "\n"
         return board_representation
+
+    def __eq__(self, other):
+        return self.board == other.board
+    
+    def __lt__ (self, other):
+        return self.board_score < other.board_score
+
+    def __hash__(self):
+        return hash(str(self.board))
