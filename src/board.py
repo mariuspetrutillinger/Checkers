@@ -60,7 +60,6 @@ class GameBoard:
         if self.board[row][col] != None and self.board[row][col].player == self.current_player:
             self.selected_piece = self.board[row][col]
             self.mandatory_capture_pieces = self.mandatory_capture(self.selected_piece)
-            print ("Valid moves: ", self.get_valid_moves(self.selected_piece))
         
     # Function to move a piece if possible, check if the piece becomes a king and change the turn
     def move_piece(self, piece, end, capture=False):

@@ -30,12 +30,42 @@ class A_Star_for_piece:
             for move in possible_moves:
                 if board.board[move[0]][move[1]] != None and board.board[move[0]][move[1]].player != piece.player:
                     exist = True
+                    return exist
         elif piece.player == self.color:
             for move in possible_moves:
                 if piece.row > move[0] and board.board[move[0]][move[1]] != None and board.board[move[0]][move[1]].player != piece.player:
                     exist = True
+                    return exist
 
         return exist
+        # end_piece = None
+
+        # if piece.col < 4:
+        #     for row in range(BOARD_SIZE-1, 0, -1):
+        #         for col in range(BOARD_SIZE):
+        #             if board.board[row][col] != None and board.board[row][col].player != self.color:
+        #                 end_piece = board.board[row][col]
+        #                 print (end_piece)
+        #                 break
+        #         if end_piece != None:
+        #             break
+        # elif piece.col < 3:
+        #     for row in range(BOARD_SIZE-1, 0, -1):
+        #         for col in range(BOARD_SIZE-1, 0, -1):
+        #             if board.board[row][col] != None and board.board[row][col].player != self.color:
+        #                 end_piece = board.board[row][col]
+        #                 print (end_piece)
+        #                 break
+        #         if end_piece != None:
+        #             break
+
+        # if end_piece != None:
+        #     possible_moves = board.get_valid_moves(piece)
+        #     for move in possible_moves:
+        #         if move[0] == end_piece.row and move[1] == end_piece.col:
+        #             return True
+        
+        # return False
 
     # function to get the heuristic value of a piece
     def heuristic(self, piece):
@@ -51,22 +81,29 @@ class A_Star_for_piece:
             return (False, self.heuristic(piece))
 
         minim = float('inf')
-        for succesors in self.get_succesors_of_piece(board, piece):
-            
+        succesors = self.get_succesors_of_piece(board, piece)
+        for succesor in succesors:
+            new_board = deepcopy(board)
+            if new_board.board[succesor[0]][succesor[1]] != None or (piece.is_valid_move((succesor[0], succesor[1])) == False):
+                continue
             try:
-                new_board = deepcopy(self.game_board)
-                new_board.move_piece(piece, (succesors[0], succesors[1]))
-                piece.positions.append((succesors[0], succesors[1]))
-                new_piece = new_board.board[succesors[0]][succesors[1]]
-
-                result, limit = self.build_path(new_board, new_piece, limit)
+                new_board.move_piece(piece, (succesor[0], succesor[1]))
+                new_piece = new_board.board[succesor[0]][succesor[1]]
+                piece.positions.append((succesor[0], succesor[1]))
+                result, new_limit = self.build_path(new_board, new_piece, limit)
             except:
-                return (False, 0)
+                continue
 
             if result:
                 return (True, 0)
+            
+            piece.positions.pop()
+            last_position = piece.positions[-1]
+            piece.row = last_position[0]
+            piece.col = last_position[1]
+            board.board[last_position[0]][last_position[1]] = piece
 
-            minim = min(minim, limit)
+            minim = min(minim, new_limit)
 
         return (False, minim)
 
@@ -86,12 +123,14 @@ class A_Star_for_piece:
                 piece.col = first_position[1]
                 piece.king = is_king
                 return "Result found"
+            depth = limit
 
             if limit == float('inf'):
                 first_position = piece.positions[0]
                 piece.row = first_position[0]
                 piece.col = first_position[1]
                 piece.king = is_king
+                print("No result found")
                 return "No result found"
 
             depth = limit
