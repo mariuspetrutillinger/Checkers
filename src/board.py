@@ -60,6 +60,7 @@ class GameBoard:
         if self.board[row][col] != None and self.board[row][col].player == self.current_player:
             self.selected_piece = self.board[row][col]
             self.mandatory_capture_pieces = self.mandatory_capture(self.selected_piece)
+            print ("Valid moves: ", self.get_valid_moves(self.selected_piece))
         
     # Function to move a piece if possible, check if the piece becomes a king and change the turn
     def move_piece(self, piece, end, capture=False):
@@ -177,12 +178,12 @@ class GameBoard:
                     if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
                         valid_moves.append(move)
             elif piece.player == 1:
-                for move in possible_moves[2:]:
-                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                for move in possible_moves:
+                    if piece.row > move[0] and self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
                         valid_moves.append(move)
             else:
-                for move in possible_moves[:2]:
-                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                for move in possible_moves:
+                    if piece.row < move[0] and self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
                         valid_moves.append(move)
         elif self.color == 2:
             if piece.king:
@@ -190,12 +191,12 @@ class GameBoard:
                     if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
                         valid_moves.append(move)
             elif piece.player == 2:
-                for move in possible_moves[2:]:
-                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                for move in possible_moves:
+                    if piece.row > move[0] and self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
                         valid_moves.append(move)
             else:
-                for move in possible_moves[:2]:
-                    if self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
+                for move in possible_moves:
+                    if piece.row < move[0] and self.board[move[0]][move[1]] == None and piece.is_valid_move(move):
                         valid_moves.append(move)
         
         return valid_moves
@@ -245,10 +246,13 @@ class GameBoard:
         for row in range(BOARD_SIZE):
             for col in range(BOARD_SIZE):
                 if self.board[row][col] != None:
+                    capture_potential = len(self.mandatory_capture(self.board[row][col]))
                     if self.board[row][col].player == 1:
                         board_score += self.board[row][col].score
+                        board_score += capture_potential
                     else:
                         board_score -= self.board[row][col].score
+                        board_score -= capture_potential
 
         return board_score
 

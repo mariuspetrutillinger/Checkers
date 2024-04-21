@@ -48,6 +48,7 @@ def game_loop(algorithm, difficulty, color):
                     if main_board.selected_piece != None:
                         copy_board = deepcopy(main_board)
                         astar.update(main_board)
+                        print ("Ida path: ")
                         astar.ida_star(main_board.selected_piece)
                         main_board.update(astar.game_board)
                         main_board.update(copy_board)

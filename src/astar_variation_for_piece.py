@@ -31,8 +31,8 @@ class A_Star_for_piece:
                 if board.board[move[0]][move[1]] != None and board.board[move[0]][move[1]].player != piece.player:
                     exist = True
         elif piece.player == self.color:
-            for move in possible_moves[2:]:
-                if board.board[move[0]][move[1]] != None and board.board[move[0]][move[1]].player != piece.player:
+            for move in possible_moves:
+                if piece.row > move[0] and board.board[move[0]][move[1]] != None and board.board[move[0]][move[1]].player != piece.player:
                     exist = True
 
         return exist
@@ -74,6 +74,7 @@ class A_Star_for_piece:
     # function to apply the ida_star algorithm
     def ida_star(self, piece):
         piece.positions = [(piece.row, piece.col)]
+        is_king = piece.king
         depth = self.heuristic(piece)
 
         while True:
@@ -83,12 +84,14 @@ class A_Star_for_piece:
                 first_position = piece.positions[0]
                 piece.row = first_position[0]
                 piece.col = first_position[1]
+                piece.king = is_king
                 return "Result found"
 
             if limit == float('inf'):
                 first_position = piece.positions[0]
                 piece.row = first_position[0]
                 piece.col = first_position[1]
+                piece.king = is_king
                 return "No result found"
 
             depth = limit
