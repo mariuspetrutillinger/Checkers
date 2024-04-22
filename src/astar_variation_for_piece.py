@@ -2,6 +2,7 @@ from constants import *
 from board import GameBoard
 from copy import deepcopy
 from queue import PriorityQueue
+import random
 
 # class to represent the A* algorithm
 class A_Star_for_piece:
@@ -15,6 +16,8 @@ class A_Star_for_piece:
         succesors = []
 
         succesors.extend(board.get_valid_moves(piece))
+
+        random.shuffle(succesors)
 
         return succesors
 

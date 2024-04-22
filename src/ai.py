@@ -1,6 +1,7 @@
 from constants import *
 from board import GameBoard
 from copy import deepcopy
+import random
 
 class AI:
     # Function to initialize the AI
@@ -153,12 +154,13 @@ class AI:
     #         return max_eval, best_move
 
     # Function for getting all mvoes and their respective boards after the move
-    def get_all_moves_and_boards(self, player):
+    def get_all_moves_and_boards(self, board, player):
         all_moves_and_boards = []
         all_moves = self.game_board.get_all_moves(player)
+        random.shuffle(all_moves)
 
         for move in all_moves:
-            new_board = deepcopy(self.game_board)
+            new_board = deepcopy(board)
             self.act_move(new_board, move)
             all_moves_and_boards.append([new_board, move])
 
@@ -172,7 +174,7 @@ class AI:
         if player == 2:
             min_eval = float("inf")
             best_move = None
-            for move in self.get_all_moves_and_boards(player):
+            for move in self.get_all_moves_and_boards(position[0], player):
                 evaluation = self.minimax_alpha_beta(move, depth - 1, 1, alpha, beta)[0]
                 min_eval = min(min_eval, evaluation)
                 if min_eval == evaluation:
@@ -186,7 +188,7 @@ class AI:
         else:
             max_eval = float("-inf")
             best_move = None
-            for move in self.get_all_moves_and_boards(player):
+            for move in self.get_all_moves_and_boards(position[0], player):
                 evaluation = self.minimax_alpha_beta(move, depth - 1, 2, alpha, beta)[0]
                 max_eval = max(max_eval, evaluation)
                 if max_eval == evaluation:
