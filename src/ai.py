@@ -7,7 +7,7 @@ class AI:
     def __init__(self, player, game_board, depth, color):
         self.player = player
         self.game_board = deepcopy(game_board)
-        self.depth = depth * 3
+        self.depth = depth * 2
         self.color = color
 
     # Function to evaluate the board state

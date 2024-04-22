@@ -38,38 +38,19 @@ class A_Star_for_piece:
                     return exist
 
         return exist
-        # end_piece = None
-
-        # if piece.col < 4:
-        #     for row in range(BOARD_SIZE-1, 0, -1):
-        #         for col in range(BOARD_SIZE):
-        #             if board.board[row][col] != None and board.board[row][col].player != self.color:
-        #                 end_piece = board.board[row][col]
-        #                 print (end_piece)
-        #                 break
-        #         if end_piece != None:
-        #             break
-        # elif piece.col < 3:
-        #     for row in range(BOARD_SIZE-1, 0, -1):
-        #         for col in range(BOARD_SIZE-1, 0, -1):
-        #             if board.board[row][col] != None and board.board[row][col].player != self.color:
-        #                 end_piece = board.board[row][col]
-        #                 print (end_piece)
-        #                 break
-        #         if end_piece != None:
-        #             break
-
-        # if end_piece != None:
-        #     possible_moves = board.get_valid_moves(piece)
-        #     for move in possible_moves:
-        #         if move[0] == end_piece.row and move[1] == end_piece.col:
-        #             return True
-        
-        # return False
 
     # function to get the heuristic value of a piece
     def heuristic(self, piece):
         return -piece.score
+
+    def simple_board_heuristic(self, board):
+        player_pieces = board.get_all_pieces(self.color)
+        opponent_pieces = board.get_all_pieces(3-self.color)
+
+        return len(opponent_pieces) - len(player_pieces)
+
+    def f_score(self, board, piece):
+        return self.simple_board_heuristic(board) + self.heuristic(piece)
 
     # function to build the path for the ida_star algorithm
     def build_path(self, board, piece, limit):
@@ -77,8 +58,10 @@ class A_Star_for_piece:
             print(("->").join([str(pos) for pos in piece.positions]))
             return (True, 0)
 
-        if limit < self.heuristic(piece):
-            return (False, self.heuristic(piece))
+        f = self.f_score(board, piece)
+
+        if limit < f:
+            return (False, f)
 
         minim = float('inf')
         succesors = self.get_succesors_of_piece(board, piece)
@@ -112,7 +95,7 @@ class A_Star_for_piece:
     def ida_star(self, piece):
         piece.positions = [(piece.row, piece.col)]
         is_king = piece.king
-        depth = self.heuristic(piece)
+        depth = self.f_score(self.game_board, piece)
 
         while True:
             result, limit = self.build_path(self.game_board, piece, depth)
