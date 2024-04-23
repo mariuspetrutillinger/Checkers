@@ -55,7 +55,8 @@ class GameBoard:
                     self.move_piece(self.selected_piece, (row, col))
                     self.selected_piece = None
                 except:
-                    print ("Invalid move. Try again")
+                    if self.current_player == 1:
+                        print ("Invalid move. Try again")
 
         if self.board[row][col] != None and self.board[row][col].player == self.current_player:
             self.selected_piece = self.board[row][col]
@@ -96,7 +97,8 @@ class GameBoard:
             self.move_piece(piece, end, True)
             self.board[capture_row][capture_col] = None
         except:
-            print ("Invalid capture move")
+            if self.current_player == 1:
+                print ("Invalid capture move")
         if self.current_player == 1:
             self.black_pieces -= 1
         else:

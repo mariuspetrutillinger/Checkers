@@ -69,5 +69,5 @@ def game_loop(algorithm, difficulty, color):
         print ("Game is a draw")
     else:
         print (f"Player {main_board.winner()} wins")
-    print (f"Score: {main_board.board_score}")
+    print (f"Score: {main_board.get_board_score()}")
     print (f"Time taken: {time.time() - start_time}")
